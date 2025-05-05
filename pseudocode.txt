@@ -1,0 +1,32 @@
+//should add expenses with a description and amount
+//see list of expenses
+//see the total amount spent
+//delete individual expenses
+//keep the data saved using localStorage
+
+//HTML file with form with inputs for description and amount
+//and an empty list where expenses will appear
+
+//in TS select the HTML elements like form, inputs, and the list
+//create an array called expenses to store each expense as object 
+//with id, description, amount
+
+//event listener for the form submission
+//when the form is submitted prevent default
+//read the values from the inputs
+//create new expense object and put it to the expense array
+//call the function to update the UI and save the data
+//function that loops through all expenses and display them in the list
+//delete button next to it
+//add up all amount to show the total 
+//event listener for delete the buttons
+//when clicked remove the corresponding expense from array
+//update the display and save
+//save the expense to localStorage every time on change
+//when page loads check if there are any saved expenses and load them into your appear
+
+//Date.Now() for generating id
+//JSON.Stringify() and JSON.parse() for localStorage
+//when rendering express always clear the list first to avoid duplicates
+//filter to remove an expense from the list
+

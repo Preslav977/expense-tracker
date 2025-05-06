@@ -1,150 +1,161 @@
-const formExpense = <HTMLFormElement>document.getElementById("formExpense");
+const formExpenseTracker = <HTMLFormElement>(
+  document.getElementById("formExpenseTracker")
+);
 
-const sendExpenseBtn = document.getElementById("sendExpenseBtn");
+const expenseUlContainer = document.getElementById("expenseUlContainer");
 
-const ulExpenseContainer = document.getElementById("ulExpenseContainer");
+const expenseTotalSum = <HTMLParagraphElement>(
+  document.getElementById("expenseTotalSum")
+);
 
-const listExpenseTotalSum = document.getElementById("totalSum");
-
-interface Expense {
+interface ExpenseTracker {
   id: number;
   description: string;
   amount: number;
 }
 
-//exposing the array because if it is in a function it would add only one
-//expense object at the time and return it
-const expenses: Expense[] = [];
+function CreateExpenseObject() {
+  const generateRandomId = Date.now();
 
-function createExpense(): object {
-  const inputDescription = (<HTMLInputElement>(
-    document.getElementById("description")
-  )).value;
+  const expensesArray: ExpenseTracker[] = [];
 
-  const inputAmount = (<HTMLInputElement>document.getElementById("amount"))
-    .value;
+  return function (description: string, amount: number) {
+    const createExpenseObject: ExpenseTracker = {
+      id: generateRandomId,
+      description: description,
+      amount: Number(amount),
+    };
 
-  const generateId: number = Date.now();
+    expensesArray.push(createExpenseObject);
 
-  const createExpenseObject: Expense = {
-    id: generateId,
-    description: inputDescription,
-    amount: Number(inputAmount),
+    localStorage.setItem("expensesList", JSON.stringify(expensesArray));
+
+    return expensesArray;
   };
-
-  expenses.push(createExpenseObject);
-
-  localStorage.setItem("expenses", JSON.stringify(expenses));
-
-  return expenses;
 }
 
-function loopExpenseAndCreateList(): void {
-  expenses.forEach((expense) => {
-    const { description, amount } = expense;
+const getCreatedExpenseObjectArray = CreateExpenseObject();
 
-    const totalSum = expenses.reduce((a, b) => a + b.amount, 0);
+function visualizeExpenseList(getTheExpenseArray: ExpenseTracker[]) {
+  const calculateTotalSum = getTheExpenseArray.reduce((a, b) => b.amount, 0);
 
-    listExpenseTotalSum!.innerText = "Total: " + totalSum.toString();
+  expenseTotalSum.textContent = `Total: ${calculateTotalSum}`;
 
-    const createListForExpense = document.createElement("li");
+  getTheExpenseArray.forEach((expense) => {
+    const { id, description, amount } = expense;
 
-    createListForExpense.setAttribute("data-id", expense.id.toString());
+    const createExpenseList = document.createElement("li");
 
-    createListForExpense.innerText = description + " " + amount;
+    createExpenseList.classList = "liExpense";
 
-    createListForExpense.classList = "listExpense";
+    createExpenseList.setAttribute("data-id", id.toString());
 
-    const deleteListBtn = document.createElement("button");
+    createExpenseList.textContent = " " + description + " " + amount;
 
-    deleteListBtn.textContent = "Delete";
+    const createExpenseListDeleteBtn = document.createElement("button");
 
-    deleteListBtn.addEventListener("click", removeListExpense);
+    createExpenseListDeleteBtn.textContent = "Delete";
 
-    createListForExpense.appendChild(deleteListBtn);
+    createExpenseListDeleteBtn.addEventListener("click", (e) => {
+      getExpenseListAttributeIdAndRemoveExpense(e, expense);
+    });
 
-    ulExpenseContainer?.appendChild(createListForExpense);
+    createExpenseList.appendChild(createExpenseListDeleteBtn);
+
+    expenseUlContainer?.appendChild(createExpenseList);
   });
 }
 
-function removeDuplicateList(): void {
+function removeDuplicateExpenseList() {
   document
-    .querySelectorAll(".listExpense")
+    .querySelectorAll(".liExpense")
     .forEach((expense) => expense.remove());
 }
 
-function removeListExpense(e: Event) {
-  // console.log(expense);
-  const removeBtnExpense = e.target;
-  // console.log(removeBtnExpense);
-  const listExpense = (<HTMLElement>removeBtnExpense).parentNode;
-  // console.log(listExpense);
-  const listExpenseId = Number(
-    (<HTMLElement>listExpense).getAttribute("data-id"),
+function getExpenseListAttributeIdAndRemoveExpense(
+  e: Event,
+  ...args: ExpenseTracker[]
+) {
+  const getCreatedExpenseListDeleteBtn = e.target;
+
+  const getCreatedExpenseList = (<HTMLElement>getCreatedExpenseListDeleteBtn)
+    .parentNode;
+
+  const getCreateExpenseAttributeId = Number(
+    (<HTMLElement>getCreatedExpenseList).getAttribute("data-id"),
   );
 
-  const idOfExpense = expenses.findIndex(
-    (expense) => expense.id === listExpenseId,
+  const deleteExpenseFromArray = args.findIndex(
+    (exp) => exp.id === Number(getCreateExpenseAttributeId),
   );
 
-  expenses.splice(idOfExpense, 1);
+  args.splice(deleteExpenseFromArray, 1);
 
-  localStorage.removeItem("expenses");
+  (<HTMLElement>getCreatedExpenseList).remove();
 
-  listExpenseTotalSum!.innerText = "";
-
-  // console.log(expense);
-
-  (<HTMLElement>removeBtnExpense).parentElement?.remove();
+  localStorage.removeItem("expensesList");
 }
 
-function resetForm() {
-  formExpense?.reset();
-}
+function checkIfThereAreAnyExpensesInLocalStorage() {
+  const localStorageExpensesList: ExpenseTracker[] = JSON.parse(
+    localStorage.getItem("expensesList") || "[]",
+  );
 
-function loadLocalStorage(): void {
-  if (localStorage.getItem("expenses")) {
-    const retrieveLocalStorage = JSON.parse(
-      localStorage.getItem("todos") || "[]",
+  if (localStorageExpensesList) {
+    const calculateTotalSum = localStorageExpensesList.reduce(
+      (a, b) => b.amount,
+      0,
     );
-    retrieveLocalStorage.forEach((expense: Expense) => {
-      const { description, amount } = expense;
 
-      const totalSum = expenses.reduce((a, b) => a + b.amount, 0);
+    expenseTotalSum.textContent = `Total: ${calculateTotalSum}`;
 
-      listExpenseTotalSum!.innerText = "Total: " + totalSum.toString();
+    localStorageExpensesList.forEach((expense) => {
+      const { id, description, amount } = expense;
 
-      const createListForExpense = document.createElement("li");
+      const createExpenseList = document.createElement("li");
 
-      createListForExpense.setAttribute("data-id", expense.id.toString());
+      createExpenseList.classList = "liExpense";
 
-      createListForExpense.innerText = description + " " + amount;
+      createExpenseList.setAttribute("data-id", id.toString());
 
-      createListForExpense.classList = "listExpense";
+      createExpenseList.textContent = " " + description + " " + amount;
 
-      const deleteListBtn = document.createElement("button");
+      const createExpenseListDeleteBtn = document.createElement("button");
 
-      deleteListBtn.textContent = "Delete";
+      createExpenseListDeleteBtn.textContent = "Delete";
 
-      deleteListBtn.addEventListener("click", removeListExpense);
+      createExpenseListDeleteBtn.addEventListener("click", (e) => {
+        getExpenseListAttributeIdAndRemoveExpense(e, expense);
+      });
 
-      createListForExpense.appendChild(deleteListBtn);
+      createExpenseList.appendChild(createExpenseListDeleteBtn);
 
-      ulExpenseContainer?.appendChild(createListForExpense);
-
-      document
-        .querySelectorAll(".listExpense")
-        .forEach((expense) => expense.remove());
+      expenseUlContainer?.appendChild(createExpenseList);
     });
   }
 }
 
-formExpense?.addEventListener("submit", (e) => {
-  e.preventDefault();
-  removeDuplicateList();
-  createExpense();
-  loopExpenseAndCreateList();
-  resetForm();
-});
+document.addEventListener("load", checkIfThereAreAnyExpensesInLocalStorage);
 
-loadLocalStorage();
+formExpenseTracker.addEventListener("submit", (e) => {
+  const expenseDescription = (<HTMLInputElement>(
+    document.getElementById("expenseDescription")
+  )).value;
+
+  const expenseAmount = Number(
+    (<HTMLInputElement>document.getElementById("expenseAmount")).value,
+  );
+
+  e.preventDefault();
+
+  removeDuplicateExpenseList();
+
+  const getTheExpenseArray = getCreatedExpenseObjectArray(
+    expenseDescription,
+    expenseAmount,
+  );
+
+  visualizeExpenseList(getTheExpenseArray);
+
+  formExpenseTracker.reset();
+});

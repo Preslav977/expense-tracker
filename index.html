@@ -9,14 +9,14 @@
   </head>
   <body>
     <div class="formContainer">
-      <form id="formExpense" action="#" method="get">
-        <label for="description">Description: </label>
-        <input type="text" name="description" id="description" />
-        <label for="amount">Amount: </label>
-        <input type="number" name="amount" id="amount" />
-        <button id="sendExpenseBtn" type="submit">Submit</button>
-        <ul id="ulExpenseContainer">
-          <p id="totalSum"></p>
+      <form id="formExpenseTracker" action="#" method="get">
+        <label for="expenseDescription">Description: </label>
+        <input type="text" name="expenseDescription" id="expenseDescription" />
+        <label for="expenseAmount">Amount: </label>
+        <input type="number" name="expenseAmount" id="expenseAmount" />
+        <button id="submitExpenseBtn" type="submit">Submit</button>
+        <ul id="expenseUlContainer">
+          <p id="expenseTotalSum"></p>
         </ul>
       </form>
     </div>
